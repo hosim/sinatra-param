@@ -196,4 +196,27 @@ class App < Sinatra::Base
     param :arg, String, required: true, raise: true
     params.to_json
   end
+
+  get '/coerce/hash/string' do
+    param :arg, Hash do
+      param :a, String
+      param :b, String
+    end
+    params.to_json
+  end
+
+  get '/coerce/hash/integer' do
+    param :arg, Hash do
+      param :a, Integer
+      param :b, Integer
+    end
+    params.to_json
+  end
+
+  get '/coerce/hash/float' do
+    param :arg, Hash do
+      param :a, Float
+    end
+    params.to_json
+  end
 end

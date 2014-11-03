@@ -128,6 +128,55 @@ describe 'Parameter Types' do
         parsed_body['arg'].should eq({ 'a' => 'b', 'c' => 'd'})
       end
     end
+
+    it 'coerces actual hashes' do
+      get('/coerce/hash', arg: {'a' => 'b', 'c' => 'd'}) do |response|
+        response.status.should == 200
+        parsed_body = JSON.parse(response.body)
+        parsed_body['arg'].should be_an(Hash)
+        parsed_body['arg'].should eq({'a' => 'b', 'c' => 'd'})
+      end
+    end
+
+    describe 'Nested String' do
+      it 'coerces string' do
+        get('/coerce/hash/string', arg: {'a' => 'b', 'c' => 'd'}) do |response|
+          response.status.should == 200
+          parsed_body = JSON.parse(response.body)
+          parsed_body['arg'].should be_an(Hash)
+          parsed_body['arg'].should eq({'a' => 'b', 'c' => 'd'})
+        end
+      end
+    end
+
+    describe 'Nested Integer' do
+      it 'coerces integers' do
+        get('/coerce/hash/integer', arg: {'a' => '12345678', 'b' => '1'})  do |response|
+          response.status.should be 200
+          parsed_body = JSON.parse(response.body)
+          parsed_body['arg'].should be_an(Hash)
+          parsed_body['arg'].should eq({'a' => 12345678, 'b' => 1})
+        end
+      end
+
+      it 'returns 400 on requests when nested integer is invalid' do
+        get('/coerce/hash/integer', arg: {'a' => '123abc', 'b' => '1234'}) do |response|
+          response.status.should == 400
+          JSON.parse(response.body)['message'].should eq('Invalid Parameter: arg.a')
+        end
+      end
+    end
+
+    describe 'Nested Float' do
+      it 'coerces floats' do
+        get('/coerce/hash/float', arg: {'a' => '1234'}) do |response|
+          response.status.should == 200
+          parsed_body = JSON.parse(response.body)
+          parsed_body['arg'].should be_an(Hash)
+          parsed_body['arg'].should eq({'a' => 1234.0})
+        end
+      end
+    end
   end
 
   describe 'Boolean' do
