@@ -219,4 +219,26 @@ class App < Sinatra::Base
     end
     params.to_json
   end
+
+  get '/coerce/hash/hash/string' do
+    param :arg, Hash do
+      param :a, String
+      param :b, Hash do
+        param :ba, String
+        param :bb, String
+      end
+    end
+    params.to_json
+  end
+
+  get '/coerce/hash/hash/integer' do
+    param :arg, Hash do
+      param :a, String
+      param :b, Hash do
+        param :ba, Integer
+        param :bb, Integer
+      end
+    end
+    params.to_json
+  end
 end

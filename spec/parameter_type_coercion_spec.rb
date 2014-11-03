@@ -177,6 +177,38 @@ describe 'Parameter Types' do
         end
       end
     end
+
+    describe 'Nested Hash' do
+      describe 'Nested String' do
+        it 'coerces string' do
+          arg = {'a' => 'abc', 'b' => {'ba' => 'aaa', 'bb' => 'bbb'}}
+          get('/coerce/hash/hash/string', arg: arg) do |response|
+            response.status.should == 200
+            parsed_body = JSON.parse(response.body)
+            parsed_body['arg'].should be_an(Hash)
+            parsed_body['arg']['a'].should eq('abc')
+            parsed_body['arg']['b'].should be_an(Hash)
+            parsed_body['arg']['b']['ba'].should eq('aaa')
+            parsed_body['arg']['b']['bb'].should eq('bbb')
+          end
+        end
+      end
+
+      describe 'Nested Integer' do
+        it 'coerces integer' do
+          arg = {'a' => 'abc', 'b' => {'ba' => '123', 'bb' => '789'}}
+          get('/coerce/hash/hash/integer', arg: arg) do |response|
+            response.status.should == 200
+            parsed_body = JSON.parse(response.body)
+            parsed_body['arg'].should be_an(Hash)
+            parsed_body['arg']['a'].should eq('abc')
+            parsed_body['arg']['b'].should be_an(Hash)
+            parsed_body['arg']['b']['ba'].should == 123
+            parsed_body['arg']['b']['bb'].should == 789
+          end
+        end
+      end
+    end
   end
 
   describe 'Boolean' do

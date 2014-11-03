@@ -20,8 +20,10 @@ module Sinatra
         value = apply_transformation(value, options.delete(:transform))
         validate!(value, options)
         @params[name.to_s] = value
-        if block_given? and (value.is_a?(Hash) or value.is_a?(Array))
-          self.class.new(@requester, value).instance_eval(&block)
+        if block_given? and value.respond_to?(:[])
+          (value.is_a?(Array) ? value : [value]).each do |v|
+            self.class.new(@requester, v).instance_eval(&block)
+          end
         end
       rescue InvalidParameterError => ex
         ex.param = ex.param ? [name, ex.param].join('.') : name
