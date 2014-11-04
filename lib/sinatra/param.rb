@@ -13,7 +13,8 @@ module Sinatra
     end
 
     def param(name, type, options = {}, &block)
-      Core.new(self, params).param(name, type, options, &block)
+      sinatra_param = @__sinatra_param || Core.new(self, params)
+      sinatra_param.param(name, type, options, &block)
     rescue InvalidParameterError => ex
       raise ex if options[:raise] or
         (settings.raise_sinatra_param exceptions rescue false)

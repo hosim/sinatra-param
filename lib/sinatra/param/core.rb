@@ -22,7 +22,11 @@ module Sinatra
         @params[name.to_s] = value
         if block_given? and value.respond_to?(:[])
           (value.is_a?(Array) ? value : [value]).each do |v|
-            self.class.new(@requester, v).instance_eval(&block)
+            @requester.instance_eval {
+              @__sinatra_param = Core.new(self, v)
+              instance_eval(&block)
+              remove_instance_variable(:@__sinatra_param) if @__sinatra_param
+            }
           end
         end
       rescue InvalidParameterError => ex
@@ -32,14 +36,6 @@ module Sinatra
       end
 
       private
-      def present?(object)
-        ! blank?(object)
-      end
-
-      def blank?(object)
-        object.respond_to?(:empty?) ? object.empty? : ! object
-      end
-
       def apply_default_value(value, option)
         if value.nil? and option
           option.respond_to?(:call) ? option.call : option
@@ -75,6 +71,11 @@ module Sinatra
             raise InvalidParameterError, Validator.message(k, v)
           end
         end
+      end
+
+      def method_missing(name, *args, &block)
+        return super unless @requester.respond_to?(name, true)
+        @requester.__send__ name, *args, &block
       end
     end
   end

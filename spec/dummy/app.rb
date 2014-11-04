@@ -221,11 +221,12 @@ class App < Sinatra::Base
   end
 
   get '/coerce/hash/hash/string' do
+    @list = %w[pee kaa boo]
     param :arg, Hash do
       param :a, String
       param :b, Hash do
-        param :ba, String
-        param :bb, String
+        param :ba, String, in: string_list
+        param :bb, String, in: @list
       end
     end
     params.to_json
@@ -240,5 +241,10 @@ class App < Sinatra::Base
       end
     end
     params.to_json
+  end
+
+  private
+  def string_list
+    %w[foo baa baz]
   end
 end
