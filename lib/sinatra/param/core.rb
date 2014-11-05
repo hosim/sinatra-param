@@ -20,19 +20,15 @@ module Sinatra
         value = apply_transformation(value, options.delete(:transform))
         validate!(value, options)
         @params[name.to_s] = value
-        if block_given? and value.respond_to?(:[])
-          (value.is_a?(Array) ? value : [value]).each do |v|
-            @requester.instance_eval {
-              @__sinatra_param = Core.new(self, v)
-              instance_eval(&block)
-              remove_instance_variable(:@__sinatra_param) if @__sinatra_param
-            }
-          end
+        return unless block_given? and value.respond_to?(:[])
+
+        (value.is_a?(Array) ? value : [value]).each do |v|
+          @requester.instance_eval {
+            @__sinatra_param = Core.new(self, v)
+            instance_eval(&block)
+            remove_instance_variable(:@__sinatra_param) if @__sinatra_param
+          }
         end
-      rescue InvalidParameterError => ex
-        ex.param = ex.param ? [name, ex.param].join('.') : name
-        ex.options ||= options
-        raise ex
       end
 
       private
@@ -54,11 +50,7 @@ module Sinatra
         return value if (value.is_a?(type) rescue false)
 
         m = "to_#{type.to_s.downcase}"
-        if Coercer.respond_to?(m) 
-          Coercer.__send__(m, value, options)
-        else
-          nil
-        end
+        Coercer.respond_to?(m) ? Coercer.__send__(m, value, options) : nil
       rescue ArgumentError
         raise InvalidParameterError, "`#{value}' is not a valid #{type}"
       end

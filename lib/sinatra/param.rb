@@ -19,7 +19,7 @@ module Sinatra
       raise ex if options[:raise] or
         (settings.raise_sinatra_param exceptions rescue false)
 
-      error = "Invalid Parameter: #{ex.param}"
+      error = "Invalid Parameter: #{name}"
       if content_type and content_type.match(mime_type(:json))
         error = {message: error, errors: {name => ex.message}}.to_json
       end
